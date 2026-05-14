@@ -4,21 +4,21 @@ A local-first personal net worth and portfolio tracker. All data is saved on you
 
 Works out of the box with **free Yahoo Finance prices** — no API key required.
 
+> **Personal project.** Built for personal interest and use. Made with [Claude](https://claude.ai).
+
 ## Download
 
 > **Easiest way to use it — no Node.js or terminal required.**
 
-Head to the [**Releases**](../../releases) page and download the installer for your OS:
+Head to the [**Releases**](../../releases) page and download the Windows installer:
 
-| Platform | File |
-|---|---|
-| Windows | `Net Worth Tracker Setup 1.0.0.exe` |
+**`Net Worth Tracker Setup 1.0.0.exe`**
 
 Install it, open it, done. Your data is stored in your OS user-data folder and survives app reinstalls.
 
 ## Features
 
-- **13 asset classes**: stocks, crypto, property, vehicles, cash & savings, commodities, bonds, private equity, jewelry, art, collectibles, business, banknotes, other
+- **14 asset classes**: stocks, crypto, property, vehicles, cash & savings, commodities, bonds, private equity, jewelry, art, collectibles, business, banknotes, other
 - **Live market prices** via Yahoo Finance (free) with optional Twelve Data fallback for ticker search
 - **Multi-currency** with live FX (8 currencies — USD, IDR, SGD, EUR, GBP, JPY, AUD, CAD)
 - **Cost basis & P&L** — unrealized, realized, per-sale FIFO, with long-term/short-term tax split
@@ -59,7 +59,7 @@ npm install
 npm run electron:build
 ```
 
-Output goes to `release/`. Requires the OS you're building for (Windows → `.exe`, Mac → `.dmg`, Linux → `.AppImage`). For cross-platform builds use a CI workflow (see [electron-builder docs](https://www.electron.build/)).
+Output goes to `release/` as a Windows `.exe` installer.
 
 ## First Time
 
@@ -80,7 +80,7 @@ The key is stored locally in `data/portfolio.json` and never leaves your machine
 
 | Mode | Data location |
 |---|---|
-| Desktop app | `%AppData%\networth-tracker\` (Win) · `~/Library/Application Support/networth-tracker/` (Mac) |
+| Desktop app | `%AppData%\networth-tracker\` |
 | Run from source | `data/portfolio.json` in the project folder |
 
 - **Export**: Settings → Export JSON / Export CSV
