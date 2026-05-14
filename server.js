@@ -201,12 +201,20 @@ if (process.env.ELECTRON_PRODUCTION) {
   app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')))
 }
 
-const PORT = 3001
+// In Electron production mode use port 0 so the OS picks any free port,
+// avoiding conflicts if the user has something else on 3001. Dev mode keeps
+// 3001 so the Vite proxy config continues to work unchanged.
+const PORT = process.env.ELECTRON_PRODUCTION ? 0 : 3001
 ensureData()
 // Bind to localhost only — this is a single-user local-first app and the data
 // file has no auth. Binding to 0.0.0.0 would let anyone on the LAN read or
 // overwrite the user's portfolio.
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Portfolio API server running on http://localhost:${PORT}`)
-  console.log(`Data file: ${DATA_FILE}`)
+export const serverReady = new Promise((resolve, reject) => {
+  const httpServer = app.listen(PORT, '127.0.0.1', () => {
+    const port = httpServer.address().port
+    console.log(`Portfolio API server running on http://localhost:${port}`)
+    console.log(`Data file: ${DATA_FILE}`)
+    resolve(port)
+  })
+  httpServer.on('error', reject)
 })

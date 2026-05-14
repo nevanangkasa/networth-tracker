@@ -12,9 +12,7 @@ Head to the [**Releases**](../../releases) page and download the installer for y
 
 | Platform | File |
 |---|---|
-| Windows | `Net Worth Tracker Setup.exe` |
-| macOS | `Net Worth Tracker.dmg` |
-| Linux | `Net Worth Tracker.AppImage` |
+| Windows | `Net Worth Tracker Setup 1.0.0.exe` |
 
 Install it, open it, done. Your data is stored in your OS user-data folder and survives app reinstalls.
 

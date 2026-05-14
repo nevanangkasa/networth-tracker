@@ -1,43 +1,22 @@
 'use strict'
 
 const { app, BrowserWindow, shell } = require('electron')
-const path = require('path')
-const http = require('http')
 
 const isDev = !app.isPackaged
 
 let mainWindow
 
-// Set env vars before the ESM server module is imported so it picks them up.
-// PORTFOLIO_DATA_DIR  → where portfolio.json lives (OS user-data folder in prod)
-// ELECTRON_PRODUCTION → tells server.js to serve dist/ as static files
+// Returns the port the Express server actually bound to.
+// Using port 0 in production lets the OS pick any free port, so the app
+// never crashes because something else happens to be on 3001.
 async function startServer () {
   process.env.PORTFOLIO_DATA_DIR = app.getPath('userData')
-  if (!isDev) process.env.ELECTRON_PRODUCTION = '1'
-  // Dynamic import works from a CJS file and correctly handles the ESM server
-  await import('../server.js')
+  process.env.ELECTRON_PRODUCTION = '1'
+  const mod = await import('../server.js')
+  return await mod.serverReady
 }
 
-// Poll the API until Express is accepting connections (max ~6 s)
-function waitForServer (retries = 20, delay = 300) {
-  return new Promise((resolve, reject) => {
-    let attempts = 0
-    const check = () => {
-      const req = http.get('http://localhost:3001/api/data', res => {
-        res.resume()
-        resolve()
-      })
-      req.on('error', () => {
-        if (++attempts >= retries) return reject(new Error('Server did not start in time'))
-        setTimeout(check, delay)
-      })
-      req.end()
-    }
-    check()
-  })
-}
-
-function createWindow () {
+function createWindow (port) {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -50,12 +29,9 @@ function createWindow () {
     },
   })
 
-  // Dev: load the Vite dev server (run `npm run dev` first)
-  // Production: load the built app served by Express
-  const url = isDev ? 'http://localhost:5173' : 'http://localhost:3001'
+  const url = isDev ? 'http://localhost:5173' : `http://localhost:${port}`
   mainWindow.loadURL(url)
 
-  // Open <a target="_blank"> links in the system browser, not a new Electron window
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
     return { action: 'deny' }
@@ -63,13 +39,21 @@ function createWindow () {
 }
 
 app.whenReady().then(async () => {
-  // In production the server hasn't been started yet — start it here.
-  // In dev the user runs `npm run dev` separately, so we skip this.
   if (!isDev) {
-    await startServer()
-    await waitForServer()
+    try {
+      const port = await startServer()
+      createWindow(port)
+    } catch (err) {
+      const { dialog } = require('electron')
+      dialog.showErrorBox(
+        'Could not start Net Worth Tracker',
+        'The server failed to start.\n\nClose any other instance of the app and try again.\n\n' + err.message
+      )
+      app.quit()
+    }
+  } else {
+    createWindow(5173)
   }
-  createWindow()
 })
 
 app.on('window-all-closed', () => {
